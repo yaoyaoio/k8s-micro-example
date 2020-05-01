@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-micro-demo-deployment
+  namespace: go-micro
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-demo
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-demo
+    spec:
+      containers:
+        - name: go-micro-demo
+          image: liuyao/go-micro-demo:latest
+          ports:
+            - containerPort: 8000
+          livenessProbe: # 存活
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 20
+            timeoutSeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 5

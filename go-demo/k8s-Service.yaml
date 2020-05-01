@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-micro-demo
+  namespace: go-micro
+  labels:
+    app: go-micro-demo
+spec:
+  ports:
+    - port: 8080
+      name: go-demo-web
+      targetPort: 8000
+  selector:
+    app: go-micro-demo
