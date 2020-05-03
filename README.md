@@ -11,12 +11,13 @@
 
 ### 2. 实现一个简单的nfs flexVolume 方便理解相关flexVolume插件使用
 
-**介绍: Flexvolume提供了一种扩展k8s存储插件的方式，用户可以自定义自己的存储插件**
+**1)介绍: Flexvolume提供了一种扩展k8s存储插件的方式，用户可以自定义自己的存储插件**
    
-   ls flexvolume/yao~nfs/nfs.sh 官方提供的nfs实现方式
-   ls flexvolume/yao~nfs/nfs.go 我写的一个go语言的demo
+    ls flexvolume/yao~nfs/nfs.sh 官方提供的nfs实现方式
+    ls flexvolume/yao~nfs/nfs.go 我写的一个go语言的demo
 
-**Flexvolume接口**
+
+**2)Flexvolume接口**
 
    实现Flexvolume插件接口 包括 init/attach/detach/waitforattach/isattached/mountdevice/unmountdevice/mount/umount
    
@@ -26,7 +27,7 @@
     /usr/libexec/kubernetes/kubelet-plugins/volume/exec/yao~nfs/nfs mount <mount dir> <json param>
     ```
     
-   pv创建方式如下
+**3)pv创建方式如下**
      
     ```  
     apiVersion: v1
