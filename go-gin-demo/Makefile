@@ -1,4 +1,4 @@
-# author: yaoyao
+# author:yao~nfs
 GOCMD=go
 GOBUILD= $(GOCMD) build
 
@@ -13,10 +13,10 @@ clear:
 	rm -rf main
 
 build-apline:
-	CGO_ENABLED=0 $(GOBUILD) main.go
+	CGO_ENABLED=0 GOOS=linux $(GOBUILD) main.go
 
 docker-build:
-	docker build -t liuyao/go-micro-demo .
+	docker build -t liuyao/go-gin-demo .
 
 docker-push:
-	docker push liuyao/go-micro-demo
+	docker push liuyao/go-gin-demo

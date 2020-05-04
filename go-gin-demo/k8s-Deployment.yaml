@@ -6,16 +6,16 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: go-micro-demo
-  replicas: 2
+      app: go-gin-demo
+      replicas: 2
   template:
     metadata:
       labels:
-        app: go-micro-demo
+        app: go-gin-demo
     spec:
       containers:
-        - name: go-micro-demo
-          image: liuyao/go-micro-demo:latest
+        - name: go-gin-demo
+          image: liuyao/go-gin-demo:latest
           ports:
             - containerPort: 8000
           livenessProbe: # 存活
@@ -32,3 +32,10 @@ spec:
             initialDelaySeconds: 5
             timeoutSeconds: 1
             periodSeconds: 5
+          volumeMounts:
+            - mountPath: /
+              name:  go-gin-demo
+      volumes:
+        - name: go-gin-demo
+          persistentVolumeClaim:
+            claimName: go-micro
