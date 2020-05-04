@@ -1,6 +1,20 @@
 # k8s-micro
 
-### 1. 一个简单的gin服务运行在k8s上的demo
+用于总结micro服务如何运行在kubernetes 包括go-micro gin consul apollo prometheus等组件及基础设施
+
+## Overview
+
+
+## Features 
+
+
+## Getting Started
+
+- [Gin on Kubernetes Demo](#Gin on Kubernetes Demo)
+
+
+
+### Gin on Kubernetes Demo
     
     ```
     cd go-demo
@@ -9,7 +23,7 @@
     kubectl apply -f k8s-Service.yaml
     ```
 
-### 2. 实现一个简单的nfs flexVolume 方便理解相关flexVolume插件使用
+### 实现一个简单的nfs flexVolume 方便理解相关flexVolume插件使用
 
 **1)介绍: Flexvolume提供了一种扩展k8s存储插件的方式，用户可以自定义自己的存储插件**
    
