@@ -17,7 +17,7 @@
 ### Gin on Kubernetes Demo
     
 ```
-cd go-demo
+cd go-gin-demo
 make build
 kubectl apply -f k8s-Deployment.yaml
 kubectl apply -f k8s-Service.yaml
@@ -63,4 +63,4 @@ spec:
       share: "export"
 ```      
     
-###Go-micro on Kubernetes Demo
+### Go-micro on Kubernetes Demo
