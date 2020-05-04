@@ -10,8 +10,7 @@
 
 ## Getting Started
 
-- [Gin on Kubernetes Demo](#Gin on Kubernetes Demo)
-
+- [Gin on Kubernetes Demo](### Gin on Kubernetes Demo)
 
 
 ### Gin on Kubernetes Demo
