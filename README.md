@@ -1,9 +1,13 @@
 # k8s-micro
 
-用于总结micro服务如何运行在kubernetes 包括go-micro gin consul apollo prometheus等组件及基础设施
+用于总结micro服务如何运行在kubernetes
 
 ## Overview
 
+基础设施: consul apollo prometheus 
+Go: go-micro gin 
+Java: 待定
+Python: 待定
 
 ## Features 
 
@@ -12,13 +16,18 @@
 
 - [Gin on Kubernetes Demo]()
 - [Simple NFS flexVolume]()
-- [Go-micro on Kubernetes Demo]()
+- [Go-micro(Web) on Kubernetes Demo]()
+- [Go-micro(RPC) on Kubernetes Demo]()
+- [Promethues on Kubernetes Demo]()
+- [Apollo on Kubernetes Demo]()
+- [Consul on Kubernetes Demo]()
 
 ### Gin on Kubernetes Demo
     
 ```
 cd go-gin-demo
-make build
+make build or docker pull liuyao/go-gin-demo
+kubectl apply -f k8s-PersistentVolumeClaim.yaml 
 kubectl apply -f k8s-Deployment.yaml
 kubectl apply -f k8s-Service.yaml
 ```
@@ -28,8 +37,8 @@ kubectl apply -f k8s-Service.yaml
 **1) 介绍: Flexvolume提供了一种扩展k8s存储插件的方式，用户可以自定义自己的存储插件**
 
 ```   
-ls flexvolume/yao~nfs/nfs.sh 官方提供的nfs实现方式
-ls flexvolume/yao~nfs/nfs.go 我写的一个go语言的demo
+ls flexvolume/yao~nfs/nfs.sh 官方提供的nfs shell实现方式
+ls flexvolume/yao~nfs/nfs.go 我写的 go 实现方式
 ```
 
 **2) Flexvolume接口**
