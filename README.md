@@ -1,13 +1,18 @@
 # k8s-micro
 
-用于总结micro服务如何运行在kubernetes
+用于总结micro服务如何运行在kubernetes 
 
 ## Overview
 
 基础设施: consul apollo prometheus 
+
 Go: go-micro gin 
+
 Java: 待定
+
 Python: 待定
+
+不断连载 包你满意 
 
 ## Features 
 
@@ -21,6 +26,7 @@ Python: 待定
 - [Promethues on Kubernetes Demo]()
 - [Apollo on Kubernetes Demo]()
 - [Consul on Kubernetes Demo]()
+- [Simple NS Docker Demo]()
 
 ### Gin on Kubernetes Demo
     
