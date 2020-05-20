@@ -18,6 +18,10 @@ spec:
           image: liuyao/go-gin-demo:latest
           ports:
             - containerPort: 8000
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "128Mi"
           livenessProbe: # 存活
             httpGet:
               port: 8000

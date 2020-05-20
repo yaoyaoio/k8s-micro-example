@@ -3,21 +3,22 @@ module k8s-micro
 go 1.14
 
 require (
-	github.com/armon/circbuf v0.0.0-20190214190532-5111143e8da2 // indirect
-	github.com/armon/go-metrics v0.0.0-20190430140413-ec5e00d3c878 // indirect
-	github.com/armon/go-radix v1.0.0 // indirect
+	github.com/ef-ds/deque v1.0.4-0.20190904040645-54cb57c252a1 // indirect
+	github.com/evanphx/json-patch/v5 v5.0.0 // indirect
 	github.com/gin-gonic/gin v1.6.2
-	github.com/google/pprof v0.0.0-20190723021845-34ac40c74b70 // indirect
-	github.com/hashicorp/go-immutable-radix v1.1.0 // indirect
-	github.com/hashicorp/go-msgpack v0.5.5 // indirect
-	github.com/hashicorp/go-version v1.2.0 // indirect
-	github.com/hashicorp/mdns v1.0.1 // indirect
-	github.com/hashicorp/serf v0.8.3 // indirect
-	github.com/micro/go-micro/v2 v2.5.0 // indirect
-	github.com/micro/go-plugins v1.5.1 // indirect
-	github.com/mitchellh/gox v1.0.1 // indirect
-	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/posener/complete v1.2.1 // indirect
-	golang.org/x/mobile v0.0.0-20190806162312-597adff16ade // indirect
+	github.com/gobwas/httphead v0.0.0-20180130184737-2c6c146eadee // indirect
+	github.com/gobwas/pool v0.2.0 // indirect
+	github.com/gobwas/ws v1.0.3 // indirect
+	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d // indirect
+	github.com/google/go-cmp v0.4.0 // indirect
+	github.com/micro/go-micro/v2 v2.3.0
+	github.com/micro/go-plugins/registry/kubernetes/v2 v2.3.0 // indirect
+	github.com/nats-io/nats-server/v2 v2.1.6 // indirect
+	github.com/prometheus/client_golang v1.2.1 // indirect
+	go.etcd.io/bbolt v1.3.4 // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/grpc v1.29.1 // indirect
+	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 )
+
+replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
