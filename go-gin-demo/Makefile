@@ -4,7 +4,7 @@ GOBUILD= $(GOCMD) build
 
 all: build
 
-build: clear build-apline docker-build docker-push
+build: clear build-apline docker-build docker-push clear
 
 clean: clear
 
