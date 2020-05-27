@@ -10,8 +10,12 @@ require (
 	github.com/gobwas/pool v0.2.0 // indirect
 	github.com/gobwas/ws v1.0.3 // indirect
 	github.com/gogo/protobuf v1.2.2-0.20190723190241-65acae22fc9d // indirect
+	github.com/golang/protobuf v1.3.5
 	github.com/google/go-cmp v0.4.0 // indirect
+	github.com/micro/go-micro v1.18.0
 	github.com/micro/go-micro/v2 v2.3.0
+	github.com/micro/go-plugins/broker/kafka/v2 v2.3.0 // indirect
+	github.com/micro/go-plugins/registry/consul/v2 v2.3.0 // indirect
 	github.com/micro/go-plugins/registry/kubernetes/v2 v2.3.0 // indirect
 	github.com/nats-io/nats-server/v2 v2.1.6 // indirect
 	github.com/prometheus/client_golang v1.2.1 // indirect

@@ -1,12 +1,8 @@
 # k8s-micro
 
-用于总结micro服务如何运行在kubernetes 
+go micro on kubernetes 
 
 ## Overview
-
-基础设施: consul apollo prometheus 
-
-Go: go-micro gin 
 
 ## Features 
 
@@ -35,3 +31,6 @@ kubectl apply -f k8s-PersistentVolumeClaim.yaml
 kubectl apply -f k8s-Deployment.yaml
 kubectl apply -f k8s-Service.yaml
 ```
+
+go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. greeter.proto
