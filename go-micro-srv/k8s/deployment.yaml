@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-srv
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-srv
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-srv
+    spec:
+      containers:
+        - name: go-micro-srv
+          image: liuyao/go-micro-srv:kubernetes
+          ports:
+            - containerPort: 9100
+              name: rpc-port
+
+

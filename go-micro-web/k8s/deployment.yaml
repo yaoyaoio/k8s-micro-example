@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-web
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-web
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-web
+    spec:
+      containers:
+        - name: go-micro-web
+          image: liuyao/go-micro-web:kubernetes
+          ports:
+            - containerPort: 9200
+              name: http-port
+
+

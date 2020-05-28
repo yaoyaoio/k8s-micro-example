@@ -2,8 +2,8 @@ FROM alpine
 
 MAINTAINER liuyao@163.com
 
-ADD ./main /main
+ADD ./server /server
 
 EXPOSE 8000
 
-CMD ["/main"]
+CMD ["/server"]

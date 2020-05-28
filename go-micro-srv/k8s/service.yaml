@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-micro-srv
+  namespace: go-micro
+  labels:
+    app: go-micro-srv
+spec:
+  ports:
+    - port: 9100
+      name: go-micro-srv
+      targetPort: 9100
+  selector:
+    app: go-micro-srv
