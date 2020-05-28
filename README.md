@@ -1,14 +1,17 @@
 # k8s-micro
 
-go micro on kubernetes 
+Go Micro on kubernetes  
 
 ## Overview
 
-## Features 
+没想好写什么
+
+## Features
+
+没想好写什么
 
 ## Getting Started
 
-- [Gin on Kubernetes]()
 - [Go-micro(Web) on Kubernetes]()
 - [Go-micro(RPC) on Kubernetes]()
 - [Go-micro(RPC/Web) on Kubernetes]()
@@ -22,6 +25,7 @@ kubectl apply -f k8s-PersistentVolumeClaim.yaml
 kubectl apply -f k8s-Deployment.yaml
 kubectl apply -f k8s-Service.yaml
 ```
+
 ### Go-micro on Kubernetes
 ```
 cd go-micro-srv

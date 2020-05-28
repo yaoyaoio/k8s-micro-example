@@ -1,4 +1,4 @@
-module k8s-micro
+module github.com/yaoliu/k8s-micro
 
 go 1.14
 

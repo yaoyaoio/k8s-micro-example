@@ -14,7 +14,7 @@ import (
 	grpcs "github.com/micro/go-micro/v2/server/grpc"
 	"github.com/micro/go-plugins/broker/kafka/v2"
 	"github.com/micro/go-plugins/registry/kubernetes/v2"
-	proto "k8s-micro/go-micro-srv/proto"
+	proto "github.com/yaoliu/k8s-micro/proto"
 	"net/http"
 	_ "net/http/pprof"
 )
@@ -23,11 +23,13 @@ type Greeter struct {
 }
 
 func (g Greeter) Hello(ctx context.Context, request *proto.HelloRequest, response *proto.HelloResponse) error {
-	panic("implement me")
+	response.Greeting = "Hello" + request.Name
+	return nil
 }
 
 var (
 	DefaultServerPort = ":9100"
+	DefaultPprofPort  = ":9300"
 )
 
 func main() {
@@ -47,7 +49,7 @@ func main() {
 	}
 
 	go func() { //pprof
-		if err := http.ListenAndServe("", nil); err != nil {
+		if err := http.ListenAndServe(DefaultPprofPort, nil); err != nil {
 
 		}
 	}()
@@ -58,7 +60,7 @@ func makeMicroRegistry() registry.Registry {
 }
 
 func makeMicroRPCServer() server.Server {
-	return grpcs.NewServer(server.Address(DefaultServerPort))
+	return grpcs.NewServer(server.Address(DefaultServerPort), server.Name("go-micro-srv"))
 }
 
 func makeMicroRPCClient() client.Client {

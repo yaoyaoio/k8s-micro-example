@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-micro-client
+  namespace: go-micro
+  labels:
+    app: go-micro-client
+spec:
+  ports:
+    - port: 9200
+      name: go-micro-client
+      targetPort: 9200
+  selector:
+    app: go-micro-client
