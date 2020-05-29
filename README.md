@@ -1,20 +1,25 @@
-# k8s-micro
+# k8s-micro [简体中文](README_CN.md)
 
 Go Micro on kubernetes  
 
 ## Overview
 
-没想好写什么
+ing...
 
 ## Features
 
-没想好写什么
+ing...
 
 ## Getting Started
 
-- [Go-micro(Web) on Kubernetes]()
-- [Go-micro(RPC) on Kubernetes]()
+- [Installing Go Micro]()
+- [Installing Protobuf]()
+- [Create Kubernetes NameSpace]()
+- [Go Micro(RPC) on Kubernetes]()
+- [Go Micro(Web) on Kubernetes]()
+- [Go Micro(RPC) MultiService on Kubernetes]()
 - [Go-micro(RPC/Web) on Kubernetes]()
+- [Using ConfigMap]()
 
 ### Gin on Kubernetes Demo
     
