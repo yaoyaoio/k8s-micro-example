@@ -12,9 +12,10 @@ ing...
 
 ## Getting Started
 
+- [Dependencies]()
 - [Installing Go Micro]()
 - [Installing Protobuf]()
-- [Create Kubernetes NameSpace]()
+- [Create Kubernetes NameSpace](#create-kubernetes-namespace)
 - [Go Micro(RPC) on Kubernetes]()
 - [Go Micro(Web) on Kubernetes]()
 - [Go Micro(RPC) MultiService on Kubernetes]()
@@ -31,7 +32,35 @@ kubectl apply -f k8s-Deployment.yaml
 kubectl apply -f k8s-Service.yaml
 ```
 
+
+### Installing Protobuf
+
+```
+go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. greeter.proto
+```
+
+
+### Create Kubernetes NameSpace
+
+1. 资源清单
+    ```
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: go-micro
+      namespace: go-micro
+    ```
+2. 创建NameSpace
+    ```
+    kubectl apply -f k8s/namespace.yaml
+    ```
+3. 查看创建结果
+    ```
+    kubectl get ns |grep micro
+    ```
 ### Go-micro on Kubernetes
+
 ```
 cd go-micro-srv
 make build or docker pull liuyao/go-micro-srv
@@ -80,5 +109,3 @@ kubectl describe svc go-micro-web -n go-micro
 
 
 
-go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
-protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. greeter.proto
