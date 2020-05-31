@@ -7,6 +7,7 @@ import (
 	"github.com/micro/go-micro/v2/web"
 	"github.com/micro/go-plugins/registry/kubernetes/v2"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -19,7 +20,8 @@ func main() {
 	service := web.NewService(opts...)
 
 	service.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
-		_, _ = writer.Write([]byte("go-micro-web"))
+		podName := os.Getenv("HOSTNAME")
+		_, _ = writer.Write([]byte(podName))
 	})
 
 	if err := service.Init(); err != nil {

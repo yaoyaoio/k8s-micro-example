@@ -16,6 +16,7 @@ spec:
       containers:
         - name: go-micro-web
           image: liuyao/go-micro-web:kubernetes
+          imagePullPolicy: Always
           ports:
             - containerPort: 9200
               name: http-port
