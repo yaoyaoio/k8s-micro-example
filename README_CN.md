@@ -11,6 +11,7 @@ Go Micro on kubernetes
 - 使用Protobuf作为编码协议
 - 使用GRPC作为RPC框架
 - 基于Kubernetes的服务发现与注册
+- 基于Kubernetes ConfigMap的配置管理
 - 多服务案例
 - 云原生应用
 
@@ -18,13 +19,13 @@ Go Micro on kubernetes
 
 - [安装 Go Micro]()
 - [安装 Protobuf]()
-- [创建kubernetes的命名空间]()
-- [创建RBAC]()
+- [创建 Kubernetes的命名空间]()
+- [创建 RBAC]()
 - [Go Micro(RPC) on Kubernetes](#go-microrpc-on-kubernetes)
 - [Go Micro(Web) on Kubernetes](#go-microweb-on-kubernetes)
-- [Go Micro(RPC) MultiService on Kubernetes](#go-microrpc-multiservice-on-kubernetes)
+- [Go Micro(RPC) 多服务运行案例](#go-microrpc-multiservice-on-kubernetes)
 - [Go-micro(RPC/Web) on Kubernetes](#go-microrpcweb-on-kubernetes)
-- [Using ConfigMap](#using-configmap)
+- [使用 ConfigMap 作为配置管理](#using-configmap)
 
 ### Installing Go Micro
 
@@ -61,16 +62,62 @@ metadata:
 kubectl apply -f k8s/namespace.yaml
 ```
 
-#### Select Result
+#### 查看结果
 
 ```
 kubectl get ns |grep micro
+go-micro          Active   36d
 ```
 
-### Create RBAC
+### 创建RBAC
 
+#### 创建Role
 
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: micro-registry
+  namespace: go-micro
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - patch
+      - watch
+```
 
+#### 创建ServiceAccount
+
+```
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: go-micro
+  name: micro-service
+```
+
+#### 创建绑定关系
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: micro-registry
+  namespace: go-micro
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: micro-registry
+subjects:
+  - kind: ServiceAccount
+    name: micro-services
+    namespace: go-micro
+```
 
 
 
