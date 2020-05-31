@@ -19,5 +19,6 @@ spec:
           ports:
             - containerPort: 9200
               name: http-port
+      serviceAccountName: micro-services
 
 
