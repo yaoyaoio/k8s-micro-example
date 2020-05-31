@@ -11,13 +11,10 @@ import (
 )
 
 func main() {
-
-	opts := []web.Option{
+	service := web.NewService(
 		web.Name("go-micro-web"),
 		web.Registry(kubernetes.NewRegistry()),
-		web.Address(":9200"),
-	}
-	service := web.NewService(opts...)
+		web.Address(":9200"))
 
 	service.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
 		podName := os.Getenv("HOSTNAME")
