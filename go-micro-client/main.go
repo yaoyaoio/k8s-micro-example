@@ -8,7 +8,6 @@ import (
 	"github.com/micro/go-micro/v2"
 	"github.com/micro/go-micro/v2/client"
 	grpcc "github.com/micro/go-micro/v2/client/grpc"
-	"github.com/micro/go-micro/v2/registry"
 	"github.com/micro/go-plugins/registry/kubernetes/v2"
 	proto "github.com/yaoliu/k8s-micro/proto"
 	"time"
@@ -17,35 +16,32 @@ import (
 func main() {
 	service := micro.NewService(
 		micro.Name("go-micro-client"),
-		micro.Client(makeMicroRPCClient()),
-		micro.Registry(makeMicroRegistry()),
+		micro.Client(grpcc.NewClient()),
+		micro.Registry(kubernetes.NewRegistry()),
 	)
 	service.Init()
-	registryRPCHandler(service.Client())
+	go func() {
+		registryRPCHandler(service.Client())
+	}()
 	if err := service.Run(); err != nil {
 		fmt.Println(err)
 	}
-}
 
-func makeMicroRPCClient() client.Client {
-	return grpcc.NewClient()
-}
-
-func makeMicroRegistry() registry.Registry {
-	return kubernetes.NewRegistry()
 }
 
 func registryRPCHandler(s client.Client) {
-	timer := time.NewTimer(time.Second * 10)
+	timer := time.NewTicker(time.Second * 10)
+	defer timer.Stop()
 	for {
 		select {
 		case <-timer.C:
-			greeter := proto.NewGreeterService("go.micro.server", s)
+			greeter := proto.NewGreeterService("go-micro-srv", s)
 			rsp, err := greeter.Hello(context.TODO(), &proto.HelloRequest{Name: "Yao"})
 			if err != nil {
 				fmt.Println(err)
+			} else {
+				fmt.Println("Server", rsp.Greeting)
 			}
-			fmt.Println(rsp.Greeting)
 		}
 	}
 }

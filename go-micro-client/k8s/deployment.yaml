@@ -17,8 +17,5 @@ spec:
         - name: go-micro-client
           image: liuyao/go-micro-client:kubernetes
           imagePullPolicy: Always
-          ports:
-            - containerPort: 9200
-              name: http-port
-
+      serviceAccountName: micro-services
 
