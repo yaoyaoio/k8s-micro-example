@@ -4,74 +4,130 @@ Go Micro on kubernetes
 
 ## Overview
 
-ing...
+
 
 ## Features
 
-ing...
+- Protobuf
+- GRPC
+- Kubernetes
+- MultiService Example
 
 ## Getting Started
 
 - [Dependencies]()
-- [Installing Go Micro]()
-- [Installing Protobuf]()
-- [Create Kubernetes NameSpace](#create-kubernetes-namespace)
-- [Go Micro(RPC) on Kubernetes]()
-- [Go Micro(Web) on Kubernetes]()
-- [Go Micro(RPC) MultiService on Kubernetes]()
-- [Go-micro(RPC/Web) on Kubernetes]()
-- [Using ConfigMap]()
+- [Installing Go Micro](#installing-go-micro)
+- [Installing Protobuf](#installing-protobuf)
+- [Create Kubernetes Namespace](#create-kubernetes-namespace)
+- [Create RBAC](#create-rbac)
+- [Go Micro(RPC) on Kubernetes](#go-microrpc-on-kubernetes)
+- [Go Micro(Web) on Kubernetes](#go-microweb-on-kubernetes)
+- [Go Micro(RPC) MultiService on Kubernetes](#go-microrpc-multiservice-on-kubernetes)
+- [Go-micro(RPC/Web) on Kubernetes](#go-microrpcweb-on-kubernetes)
+- [Using ConfigMap](#using-configmap)
 
-### Gin on Kubernetes Demo
-    
-```
-cd go-gin-demo
-make build or docker pull liuyao/go-gin-demo
-kubectl apply -f k8s-PersistentVolumeClaim.yaml 
-kubectl apply -f k8s-Deployment.yaml
-kubectl apply -f k8s-Service.yaml
-```
+### Installing Go Micro
 
+```
+go get github.com/micro/go-micro/v2
+go get github.com/micro/go-plugins/registry/kubernetes/v2
+```
 
 ### Installing Protobuf
 
 ```
+brew install protobuf
 go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
-protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. greeter.proto
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
 ```
 
+### Create Kubernetes Namespace
 
-### Create Kubernetes NameSpace
+#### Writing a namespace
 
-1. 资源清单
-    ```
-    apiVersion: v1
-    kind: Namespace
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: go-micro
+  namespace: go-micro
+```
+
+#### Deploying a NameSpace
+
+```
+kubectl apply -f k8s/namespace.yaml
+```
+
+#### Select Result
+
+```
+kubectl get ns |grep micro
+```
+
+### Create RBAC
+
+
+
+
+
+
+### Go Micro(RPC) on Kubernetes
+
+**go-micro-srv**
+
+#### Writing a Go Micro Service
+
+#### Deployment
+
+**Here’s an example k8s deployment for a micro service**
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-srv
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-srv
+  replicas: 2
+  template:
     metadata:
-      name: go-micro
-      namespace: go-micro
-    ```
-2. 创建NameSpace
-    ```
-    kubectl apply -f k8s/namespace.yaml
-    ```
-3. 查看创建结果
-    ```
-    kubectl get ns |grep micro
-    ```
-### Go-micro on Kubernetes
+      labels:
+        app: go-micro-srv
+    spec:
+      containers:
+        - name: go-micro-srv
+          image: liuyao/go-micro-srv:kubernetes
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9100
+              name: rpc-port
 
 ```
-cd go-micro-srv
+Deploy with kubectl
+
+```
+kubectl apply -f k8s/deployment.yaml
+```
+
+
+```
+
+kubectl apply -f k8s/service.yaml
+
+
+
 make build or docker pull liuyao/go-micro-srv
 kubectl apply -f k8s/role.yaml
 kubectl apply -f k8s/roleBinding.yaml
 kubectl apply -f k8s/persistentVolumeClaim.yaml 
 kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
 ```
 
-### Go Micro Web on Kubernetes
+### Go Micro(Web) on Kubernetes
 ```
 cd go-micro-web
 make build or docker pull liuyao/go-micro-web
@@ -101,11 +157,13 @@ kubectl get svc -n go-micro -o wide
 kubectl describe svc go-micro-web -n go-micro 
 ```
 
+### Go Micro(RPC) MultiService on Kubernetes
 
 
 
 
 
 
+### Go-micro(RPC/Web) on Kubernetes
 
-
+### Using ConfigMap

@@ -20,5 +20,6 @@ spec:
           ports:
             - containerPort: 9100
               name: rpc-port
+      serviceAccountName: micro-services
 
 
