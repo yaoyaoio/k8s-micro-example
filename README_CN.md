@@ -15,7 +15,7 @@ Go Micro on kubernetes
 - 多服务案例
 - 云原生应用
 
-## Getting Started
+## 开始
 
 - [安装 Go Micro]()
 - [安装 Protobuf]()
@@ -27,14 +27,14 @@ Go Micro on kubernetes
 - [Go-micro(RPC/Web) on Kubernetes](#go-microrpcweb-on-kubernetes)
 - [使用 ConfigMap 作为配置管理](#using-configmap)
 
-### Installing Go Micro
+### 安装 Go Micro
 
 ```
 go get github.com/micro/go-micro/v2
 go get github.com/micro/go-plugins/registry/kubernetes/v2
 ```
 
-### Installing Protobuf
+### 安装 Protobuf
 
 ```
 brew install protobuf
@@ -69,7 +69,9 @@ kubectl get ns |grep micro
 go-micro          Active   36d
 ```
 
-### 创建RBAC
+### 创建RBAC 
+
+**对serviceaccount绑定操作pod及操作configmap的权限 会挂载到每个pod到/var/run/secrets/kubernetes.io/serviceaccount下面**
 
 #### 创建Role
 
