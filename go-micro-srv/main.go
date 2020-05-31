@@ -14,8 +14,7 @@ import (
 	_ "net/http/pprof"
 )
 
-type Greeter struct {
-}
+type Greeter struct{}
 
 func (g Greeter) Hello(ctx context.Context, request *proto.HelloRequest, response *proto.HelloResponse) error {
 	response.Greeting = "Hello " + request.Name + "!"
@@ -23,13 +22,14 @@ func (g Greeter) Hello(ctx context.Context, request *proto.HelloRequest, respons
 }
 
 var (
-	DefaultServerPort = ":9100"
+	DefaultServerPort  = ":9100"
+	DefaultServiceName = "go-micro-srv"
 )
 
 func main() {
 	service := micro.NewService(
-		micro.Name("go-micro-srv"),
-		micro.Server(grpcs.NewServer(server.Address(DefaultServerPort), server.Name("go-micro-srv"))),
+		micro.Name(DefaultServiceName),
+		micro.Server(grpcs.NewServer(server.Address(DefaultServerPort), server.Name(DefaultServiceName))),
 		micro.Client(grpcc.NewClient()),
 		micro.Registry(kubernetes.NewRegistry()),
 	)
