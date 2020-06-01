@@ -13,9 +13,14 @@ import (
 	"time"
 )
 
+var (
+	DefaultServiceName = "go-micro-client"
+	DefaultSrvName     = "go-micro-srv"
+)
+
 func main() {
 	service := micro.NewService(
-		micro.Name("go-micro-client"),
+		micro.Name(DefaultServiceName),
 		micro.Client(grpcc.NewClient()),
 		micro.Registry(kubernetes.NewRegistry()),
 	)
@@ -35,7 +40,7 @@ func registryRPCHandler(s client.Client) {
 	for {
 		select {
 		case <-timer.C:
-			greeter := proto.NewGreeterService("go-micro-srv", s)
+			greeter := proto.NewGreeterService(DefaultSrvName, s)
 			rsp, err := greeter.Hello(context.TODO(), &proto.HelloRequest{Name: "Yao"})
 			if err != nil {
 				fmt.Println(err)

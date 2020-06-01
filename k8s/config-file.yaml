@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: go-micro-config
-  namespace: go-micro
-data:
-  config.yaml: |
-
-

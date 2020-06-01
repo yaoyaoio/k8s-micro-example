@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: go-micro-config-kv
-  namespace: go-micro
-data:
-  INFO: KY
