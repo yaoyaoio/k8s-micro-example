@@ -17,5 +17,7 @@ spec:
         - name: go-micro-config
           image: liuyao/go-micro-config:kubernetes
           imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: go-micro-config
       serviceAccountName: micro-services
-

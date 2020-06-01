@@ -222,3 +222,64 @@ kubectl logs go-micro-web-56b457b9f7-f7lds -n go-micro
 kubectl get svc -n go-micro -o wide
 kubectl describe svc go-micro-web -n go-micro 
 ```
+
+kubectl get pods -n go-micro
+NAME                              READY   STATUS    RESTARTS   AGE
+go-micro-client-64b999f5d-m9ffk   1/1     Running   0          20m
+go-micro-client-64b999f5d-wntkz   1/1     Running   0          20m
+
+
+
+kubectl describe pod go-micro-client-64b999f5d-wntkz -n go-micro
+Name:         go-micro-client-64b999f5d-wntkz
+Namespace:    go-micro
+Priority:     0
+Node:         k8s-node-1/192.168.0.108
+Start Time:   Tue, 28 Apr 2020 01:41:28 -0400
+Labels:       app=go-micro-client
+              micro.mu/selector-go-micro-client=service
+              micro.mu/type=service
+              pod-template-hash=64b999f5d
+Annotations:  cni.projectcalico.org/podIP: 10.100.109.133/32
+              cni.projectcalico.org/podIPs: 10.100.109.133/32
+              micro.mu/service-go-micro-client:
+                {"name":"go-micro-client","version":"latest","metadata":null,"endpoints":[],"nodes":[{"id":"go-micro-client-d227891e-29b1-4d7f-81ad-d53ae1...
+Status:       Running
+IP:           10.100.109.133
+IPs:
+  IP:           10.100.109.133
+Controlled By:  ReplicaSet/go-micro-client-64b999f5d
+Containers:
+  go-micro-client:
+    Container ID:   docker://5fffe1010fc626303834111c7e9a98c7c8a9effb2a2a9d4676e91a8d2fc2182f
+    Image:          liuyao/go-micro-client:kubernetes
+    Image ID:       docker-pullable://liuyao/go-micro-client@sha256:52704576092baf1639acb7f7cc63ff1e7f7a58b859187a5f5b2506be89a503ae
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Tue, 28 Apr 2020 01:57:37 -0400
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from micro-services-token-j9gr8 (ro)
+      
+                      
+
+kubectl logs go-micro-client-64b999f5d-wntkz -n go-micro
+2020-04-28 05:57:37  level=info Starting [service] go-micro-client
+2020-04-28 05:57:37  level=info Server [grpc] Listening on [::]:46701
+2020-04-28 05:57:37  level=info Registry [kubernetes] Registering node: go-micro-client-d227891e-29b1-4d7f-81ad-d53ae11bb7f6
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!
+Server Hello Yao!

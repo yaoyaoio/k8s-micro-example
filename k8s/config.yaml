@@ -1,23 +1,76 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: go-micro-config
+  name: go-micro-configvars
   namespace: go-micro
 data:
-  config.json: |
-    {
-      "hosts": {
-        "database": {
-          "address": "10.0.0.1",
-          "port": 3306
-        },
-        "cache": {
-          "address": "10.0.0.2",
-          "port": 6379
-        }
-      }
-    }
   DB_NAME: MICRO
-
-
-
+  DB_HOST: 192.168.0.1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-micro-configfiles
+  namespace: go-micro
+data:
+  service.yaml: |
+    DB_NAME: MICRO
+    DB_HOST: 192.168.0.1
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-test-pod-vars
+  namespace: go-micro
+spec:
+  containers:
+    - name: cm-test
+      image: busybox
+      command: ["/bin/sh", "-c", "env"]
+      env:
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: DB_NAME
+              name: go-micro-configvars
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: DB_HOST
+              name: go-micro-configvars
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-test-pod
+  namespace: go-micro
+spec:
+  containers:
+    - name: cm-test
+      image: busybox
+      command: ["/bin/sh", "-c", "env"]
+      envFrom:
+        - configMapRef:
+            name: go-micro-configvars
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-test-pod
+  namespace: go-micro
+spec:
+  containers:
+    - name: cm-test
+      image: busybox
+    - volumeMounts:
+        - mountPath: /configfiles
+          name: serviceyaml
+  volumes:
+    - name: serviceyaml
+      configMap:
+        name: go-micro-configfiles
+        items:
+          - key: service.yaml
+            path: service.aml
