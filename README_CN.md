@@ -16,14 +16,13 @@ Go Micro on kubernetes
 - 云原生应用
 
 ## 开始
-
 - [安装 Go Micro]()
 - [安装 Protobuf]()
 - [创建 Kubernetes的命名空间]()
 - [创建 RBAC]()
-- [Go Micro(RPC) on Kubernetes](#go-microrpc-on-kubernetes)
-- [Go Micro(Web) on Kubernetes](#go-microweb-on-kubernetes)
-- [Go Micro(RPC) 多服务运行案例](#go-microrpc-multiservice-on-kubernetes)
+- [RPC服务案例](#go-microrpc-on-kubernetes)
+- [Web服务案例](#go-microweb-on-kubernetes)
+- [多服务(Server/Client)运行案例](#go-microrpc-multiservice-on-kubernetes)
 - [Go-micro(RPC/Web) on Kubernetes](#go-microrpcweb-on-kubernetes)
 - [使用 ConfigMap 作为配置管理](#using-configmap)
 
@@ -127,8 +126,30 @@ subjects:
 
 **go-micro-srv**
 
-#### Writing a Go Micro Service
 
+```
+make build or docker pull liuyao/go-micro-srv
+
+```
+
+#### Writing a Go Micro Service
+```
+func main() {
+	service := micro.NewService(
+		micro.Name(DefaultServiceName),
+		micro.Server(grpcs.NewServer(server.Address(DefaultServerPort), server.Name(DefaultServiceName))),
+		micro.Client(grpcc.NewClient()),
+		micro.Registry(kubernetes.NewRegistry()),
+	)
+	service.Init()
+
+	_ = proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+
+	if err := service.Run(); err != nil {
+		fmt.Println(err)
+	}
+}
+```
 #### Deployment
 
 **Here’s an example k8s deployment for a micro service**
@@ -156,33 +177,27 @@ spec:
           ports:
             - containerPort: 9100
               name: rpc-port
-
 ```
-Deploy with kubectl
+
+#### Deploy with kubectl
 
 ```
 kubectl apply -f k8s/deployment.yaml
 ```
 
-
+#### Deplpy 
 ```
-
 kubectl apply -f k8s/service.yaml
-
-
-
-make build or docker pull liuyao/go-micro-srv
-kubectl apply -f k8s/role.yaml
-kubectl apply -f k8s/roleBinding.yaml
-kubectl apply -f k8s/persistentVolumeClaim.yaml 
-kubectl apply -f k8s/deployment.yaml
 ```
 
-### Go Micro(Web) on Kubernetes
+### Web服务运行案例
+
 ```
 cd go-micro-web
 make build or docker pull liuyao/go-micro-web
 ```
+
+
 ```
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
@@ -207,14 +222,3 @@ kubectl logs go-micro-web-56b457b9f7-f7lds -n go-micro
 kubectl get svc -n go-micro -o wide
 kubectl describe svc go-micro-web -n go-micro 
 ```
-
-### Go Micro(RPC) MultiService on Kubernetes
-
-
-
-
-
-
-### Go-micro(RPC/Web) on Kubernetes
-
-### Using ConfigMap

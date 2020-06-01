@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-config
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-config
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-config
+    spec:
+      containers:
+        - name: go-micro-config
+          image: liuyao/go-micro-config:kubernetes
+          imagePullPolicy: Always
+      serviceAccountName: micro-services
+
