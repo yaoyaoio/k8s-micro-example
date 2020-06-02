@@ -20,4 +20,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: go-micro-config
-      serviceAccountName: micro-services
+      restartPolicy: Never
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-micro-config
+  namespace: go-micro
+data:
+  DB_NAME: MICRO
+  DB_HOST: 192.168.0.1

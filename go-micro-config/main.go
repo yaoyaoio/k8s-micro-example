@@ -10,14 +10,17 @@ import (
 )
 
 var (
-	DefaultNamespace = "go-micro"
+	DefaultNamespace  = "go-micro"
+	DefaultConfigName = "go-micro-config"
 )
 
 func main() {
 	if cfg, err := config.NewConfig(); err == nil {
 		err = cfg.Load(
 			env.NewSource(),
-			configmap.NewSource(configmap.WithNamespace(DefaultNamespace)),
+			configmap.NewSource(
+				configmap.WithName(DefaultConfigName),
+				configmap.WithNamespace(DefaultNamespace)),
 		)
 		if err == nil {
 			fmt.Println(cfg.Map())

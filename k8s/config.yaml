@@ -64,7 +64,7 @@ spec:
   containers:
     - name: cm-test
       image: busybox
-    - volumeMounts:
+      volumeMounts:
         - mountPath: /configfiles
           name: serviceyaml
   volumes:
