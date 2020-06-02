@@ -20,6 +20,7 @@ spec:
           envFrom:
             - configMapRef:
                 name: go-micro-config
+      serviceAccountName: micro-services
 ---
 apiVersion: v1
 kind: ConfigMap
