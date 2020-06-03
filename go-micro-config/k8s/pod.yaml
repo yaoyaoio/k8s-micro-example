@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: go-micro-config
+  namespace: go-micro
+spec:
+  containers:
+    - name: go-micro-config
+      image: liuyao/go-micro-config:kubernetes
+      imagePullPolicy: Always
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-micro-config
+  namespace: go-micro
+data:
+  DB_NAME: MICRO
+  DB_HOST: 192.168.0.1
