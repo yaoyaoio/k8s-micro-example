@@ -4,10 +4,11 @@ Go Micro on kubernetes
 
 ## 总览
 
-
+此项目主要演示了Go-Micro微服务框架如何运行在Kubernetes集群上，并通过调用APIServer的方式来进行服务发现注册及配置管理
 
 ## 特性
 
+- Go-Micro作为微服务框架
 - 使用Protobuf作为编码协议
 - 使用GRPC作为RPC框架
 - 基于Kubernetes的服务发现与注册
