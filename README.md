@@ -167,3 +167,16 @@ kubectl describe svc go-micro-web -n go-micro
 ### Go-micro(RPC/Web) on Kubernetes
 
 ### Using ConfigMap
+#### 原理
+此处有图
+https://10.96.0.1:443/api/v1/namespaces/go-micro/configmaps/go-micro-config"
+#### 写一个configmaps
+
+#### 编写代码
+
+#### 运行
+
+#### 查看
+
+[root@k8s-master-1 k8s]# kubectl logs go-micro-config -n go-micro
+map[DB_HOST:map[192.168.0.1:] DB_NAME:map[MICRO:] go:map[micro:map[srv:map[port:map[9100:map[tcp:map[addr:10.96.196.160 port:9100 proto:tcp]]] service:map[host:10.96.196.160 port:map[go:map[micro:map[srv:9100]]]]] web:map[port:map[9200:map[tcp:map[addr:10.96.218.32 port:9200 proto:tcp]]] service:map[host:10.96.218.32 port:map[go:map[micro:map[web:9200]]]]]]] home:/root hostname:go-micro-config kubernetes:map[port:map[443:map[tcp:tcp://10.96.0.1:443]] service:map[host:10.96.0.1 port:443]] path:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin]
