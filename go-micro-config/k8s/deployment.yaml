@@ -21,6 +21,7 @@ spec:
             - configMapRef:
                 name: go-micro-config
       serviceAccountName: micro-services
+      restartPolicy: Never
 ---
 apiVersion: v1
 kind: ConfigMap

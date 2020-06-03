@@ -1,8 +1,8 @@
-# k8s-micro [简体中文](README_CN.md)
+# k8s-micro [英文](README.md)
 
 Go Micro on kubernetes  
 
-## 总揽
+## 总览
 
 
 
@@ -20,11 +20,11 @@ Go Micro on kubernetes
 - [安装 Protobuf]()
 - [创建 Kubernetes的命名空间]()
 - [创建 RBAC]()
-- [RPC服务案例](#go-microrpc-on-kubernetes)
-- [Web服务案例](#go-microweb-on-kubernetes)
-- [多服务(Server/Client)运行案例](#go-microrpc-multiservice-on-kubernetes)
-- [Go-micro(RPC/Web) on Kubernetes](#go-microrpcweb-on-kubernetes)
-- [使用 ConfigMap 作为配置管理](#using-configmap)
+- [RPC服务案例]()
+- [Web服务案例]()
+- [多服务(Server/Client)运行案例]()
+- [Go-micro(RPC/Web) on Kubernetes]()
+- [使用 ConfigMap 作为配置管理]()
 
 ### 安装 Go Micro
 
