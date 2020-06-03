@@ -9,6 +9,7 @@ spec:
       image: liuyao/go-micro-config:kubernetes
       imagePullPolicy: Always
   restartPolicy: Never
+  serviceAccountName: micro-services
 ---
 apiVersion: v1
 kind: ConfigMap
