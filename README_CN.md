@@ -290,13 +290,73 @@ Server Hello Yao!
 #### 原理
 此处有图
 https://10.96.0.1:443/api/v1/namespaces/go-micro/configmaps/go-micro-config"
-#### 写一个configmaps
+#### 编写ConfigMap清单
 
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-micro-config
+  namespace: go-micro
+data:
+  DB_NAME: MICRO
+  DB_HOST: 192.168.0.1
+```
 
 #### 编写代码
 
+```
+import (
+	"fmt"
+	"github.com/micro/go-micro/v2/config"
+	"github.com/micro/go-micro/v2/config/source/env"
+	"github.com/micro/go-plugins/config/source/configmap/v2"
+)
+
+var (
+	DefaultNamespace  = "go-micro"
+	DefaultConfigName = "go-micro-config"
+)
+
+func main() {
+	if cfg, err := config.NewConfig(); err == nil {
+		err = cfg.Load(
+			env.NewSource(),
+			configmap.NewSource(
+				configmap.WithName(DefaultConfigName),
+				configmap.WithNamespace(DefaultNamespace)),
+		)
+		if err == nil {
+			fmt.Println(cfg.Map())
+		}
+		fmt.Println(err)
+	}
+}
+```
+
+#### 编写运行Pod清单
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: go-micro-config
+  namespace: go-micro
+spec:
+  containers:
+    - name: go-micro-config
+      image: liuyao/go-micro-config:kubernetes
+      imagePullPolicy: Always
+  restartPolicy: Never
+  serviceAccountName: micro-services
+```
+
 #### 运行
 
+```
+cd go-micro-config
+kubectl apply -f k8s/pod.yaml
+```
 #### 查看
 
 [root@k8s-master-1 k8s]# kubectl logs go-micro-config -n go-micro
