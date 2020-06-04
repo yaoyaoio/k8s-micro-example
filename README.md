@@ -4,6 +4,8 @@ Go Micro on kubernetes
 
 ## Overview
 
+This project mainly demonstrates how the [Go-Micro](https://github.com/micro/) runs on the kubernetes cluster, 
+and through the way of calling apiserver to carry out service discovery registration and configuration management
 
 ## Features
 

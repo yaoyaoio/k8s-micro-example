@@ -4,13 +4,13 @@ Go Micro on kubernetes
 
 ## 总览
 
-此项目主要演示了Go-Micro微服务框架如何运行在Kubernetes集群上，并通过调用APIServer的方式来进行服务发现注册及配置管理
+此项目主要演示了[Go-Micro](https://github.com/micro/) 微服务框架如何运行在Kubernetes集群上，并通过调用APIServer的方式来进行服务发现注册及配置管理
 
 ## 特性
 
 - Go-Micro作为微服务框架
-- 使用Protobuf作为编码协议
-- 使用GRPC作为RPC框架
+- Protobuf作为编码协议
+- GRPC作为RPC框架
 - 基于Kubernetes的服务发现与注册
 - 基于Kubernetes ConfigMap的配置管理
 - 多服务案例
@@ -284,3 +284,26 @@ Server Hello Yao!
 Server Hello Yao!
 Server Hello Yao!
 Server Hello Yao!
+
+
+### 使用 ConfigMap 作为配置管理
+#### 原理
+此处有图
+https://10.96.0.1:443/api/v1/namespaces/go-micro/configmaps/go-micro-config"
+#### 写一个configmaps
+
+
+#### 编写代码
+
+#### 运行
+
+#### 查看
+
+[root@k8s-master-1 k8s]# kubectl logs go-micro-config -n go-micro
+map[DB_HOST:map[192.168.0.1:] DB_NAME:map[MICRO:] 
+go:map[micro:map[srv:map[port:map[9100:map[tcp:map[addr:10.96.196.160 port:9100 proto:tcp]]] 
+service:map[host:10.96.196.160 port:map[go:map[micro:map[srv:9100]]]]] 
+web:map[port:map[9200:map[tcp:map[addr:10.96.218.32 port:9200 proto:tcp]]] 
+service:map[host:10.96.218.32 port:map[go:map[micro:map[web:9200]]]]]]] 
+home:/root hostname:go-micro-config kubernetes:map[port:map[443:map[tcp:tcp://10.96.0.1:443]] 
+service:map[host:10.96.0.1 port:443]] path:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin]
