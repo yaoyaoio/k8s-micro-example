@@ -18,9 +18,10 @@ Go Micro on kubernetes
 
 ## 开始
 - [安装 Go Micro]()
-- [安装 Protobuf]()
+- [安装 Protobuf及编写Proto文件]()
 - [创建 Kubernetes的命名空间]()
 - [创建 RBAC]()
+- [基于Kubernetes服务发现与注册的实现原理]()
 - [RPC服务案例]()
 - [Web服务案例]()
 - [多服务(Server/Client)运行案例]()
@@ -34,14 +35,35 @@ go get github.com/micro/go-plugins/registry/kubernetes/v2@v2.3.0
 go get github.com/micro/go-plugins/config/source/configmap/v2@v2.3.0
 ```
 
-### 安装 Protobuf
+### 安装 Protobuf及编写Proto文件
 
+#### 安装Protobuf
 ```
 brew install protobuf
 go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
-protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
+```
+#### 编写Proto文件
+```
+syntax = "proto3";
+
+service Greeter {
+    rpc Hello (HelloRequest) returns (HelloResponse) {
+    }
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloResponse {
+    string greeting = 2;
+}
 ```
 
+#### 生成代码
+```
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
+```
 ### 创建kubernetes的命名空间
 **所有服务都运行在此命名空间下**
 #### 命名空间清单写法如下
@@ -62,8 +84,21 @@ kubectl get ns |grep micro
 go-micro          Active   36d
 ```
 ### 创建RBAC 
+**对serviceaccount绑定操作pod及操作configmap的权限,会挂载到每个pod到/var/run/secrets/kubernetes.io/serviceaccount下面.**
 
-**对serviceaccount绑定操作pod及操作configmap的权限 会挂载到每个pod到/var/run/secrets/kubernetes.io/serviceaccount下面**
+#### 编写操作Pod及ConfigMap的Role文件
+
+#### 编写ServiceAccount文件
+
+#### 编写将Role绑定到ServiceAccount文件
+
+#### 创建
+
+### 基于Kubernetes服务发现与注册的实现原理
+
+Pod运行后 Micro相关服务注册的时候会先加载环境变量获取xx和xx，然后/var/run/secrets/kubernetes.io/serviceaccount 
+发起HTTP请求，更新自己的Pod信息，增加xxx字段 相关代码可以查看和部分
+
 
 ### RPC服务案例
 **整个工程及代码，Dockerfile，Makefile，k8s相关文件都在go-micro-srv目录下**
@@ -73,7 +108,6 @@ kubectl apply -f go-micro-srv/k8s/deployment.yaml
 kubectl apply -f go-micro-srv/k8s/service.yaml
 ```
 #### 编写代码
-需要提前使用protobuf把proto文件生成好对应代码
 ```
 import (
 	"context"
@@ -98,8 +132,8 @@ func main() {
 	service := micro.NewService(
 		micro.Name(DefaultServiceName),
 		micro.Server(grpcs.NewServer(server.Address(DefaultServerPort), server.Name(DefaultServiceName))),
-		micro.Client(grpcc.NewClient()),
-		micro.Registry(kubernetes.NewRegistry()),
+		micro.Client(grpcc.NewClient()), 
+		micro.Registry(kubernetes.NewRegistry()),//注册到Kubernetes
 	)
 	service.Init()
 
@@ -153,16 +187,40 @@ spec:
             - containerPort: 9100
               name: rpc-port
 ```
-#### Deploy with kubectl
-
+#### 编写Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-micro-srv
+  namespace: go-micro
+  labels:
+    app: go-micro-srv
+spec:
+  ports:
+    - port: 9100
+      name: go-micro-srv
+      targetPort: 9100
+  selector:
+    app: go-micro-srv
+#### 部署
 ```
 kubectl apply -f k8s/deployment.yaml
-```
-
-#### Deplpy 
-```
 kubectl apply -f k8s/service.yaml
 ```
+
+#### 查看运行状态及注册状态
+```
+
+```
+
+
+
+
+
+
+
+
+
 
 ### Web服务运行案例
 
