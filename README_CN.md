@@ -25,7 +25,9 @@ Go Micro on kubernetes
 - [RPC服务案例]()
 - [Web服务案例]()
 - [多服务(Server/Client)运行案例]()
-- [使用 ConfigMap 作为配置管理]()
+- [基于Kubernetes ConfigMap做配置管理的实现原理]()
+- [使用 ConfigMap]()
+
 
 ### 安装 Go Micro
 
