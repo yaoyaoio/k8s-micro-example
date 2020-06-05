@@ -24,14 +24,14 @@ Go Micro on kubernetes
 - [RPC服务案例]()
 - [Web服务案例]()
 - [多服务(Server/Client)运行案例]()
-- [Go-micro(RPC/Web) on Kubernetes]()
 - [使用 ConfigMap 作为配置管理]()
 
 ### 安装 Go Micro
 
 ```
-go get github.com/micro/go-micro/v2
-go get github.com/micro/go-plugins/registry/kubernetes/v2
+go get github.com/micro/go-micro/v2@v2.3.0
+go get github.com/micro/go-plugins/registry/kubernetes/v2@v2.3.0
+go get github.com/micro/go-plugins/config/source/configmap/v2@v2.3.0
 ```
 
 ### 安装 Protobuf
@@ -43,11 +43,8 @@ protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
 ```
 
 ### 创建kubernetes的命名空间
-
 **所有服务都运行在此命名空间下**
-
 #### 命名空间清单写法如下
-
 ```
 apiVersion: v1
 kind: Namespace
@@ -55,86 +52,48 @@ metadata:
   name: go-micro
   namespace: go-micro
 ```
-
 #### 部署命名空间
-
 ```
 kubectl apply -f k8s/namespace.yaml
 ```
-
 #### 查看结果
-
 ```
 kubectl get ns |grep micro
 go-micro          Active   36d
 ```
-
 ### 创建RBAC 
 
 **对serviceaccount绑定操作pod及操作configmap的权限 会挂载到每个pod到/var/run/secrets/kubernetes.io/serviceaccount下面**
 
-#### 创建Role
-
+### RPC服务案例
+**整个工程及代码，Dockerfile，Makefile，k8s相关文件都在go-micro-srv目录下**
+#### 快速部署
 ```
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: micro-registry
-  namespace: go-micro
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - pods
-    verbs:
-      - get
-      - list
-      - patch
-      - watch
+kubectl apply -f go-micro-srv/k8s/deployment.yaml
+kubectl apply -f go-micro-srv/k8s/service.yaml
 ```
-
-#### 创建ServiceAccount
-
+#### 编写代码
+需要提前使用protobuf把proto文件生成好对应代码
 ```
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  namespace: go-micro
-  name: micro-service
-```
+import (
+	"context"
+	"fmt"
+	"github.com/micro/go-micro/v2"
+	grpcc "github.com/micro/go-micro/v2/client/grpc"
+	"github.com/micro/go-micro/v2/server"
+	grpcs "github.com/micro/go-micro/v2/server/grpc"
+	"github.com/micro/go-plugins/registry/kubernetes/v2"
+	proto "github.com/yaoliu/k8s-micro/proto"
+	_ "net/http/pprof"
+)
 
-#### 创建绑定关系
+type Greeter struct{}
 
-```
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: micro-registry
-  namespace: go-micro
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: micro-registry
-subjects:
-  - kind: ServiceAccount
-    name: micro-services
-    namespace: go-micro
-```
+func (g Greeter) Hello(ctx context.Context, request *proto.HelloRequest, response *proto.HelloResponse) error {
+	response.Greeting = "Hello " + request.Name + "!"
+	return nil
+}
 
-
-
-### Go Micro(RPC) on Kubernetes
-
-**go-micro-srv**
-
-
-```
-make build or docker pull liuyao/go-micro-srv
-
-```
-
-#### Writing a Go Micro Service
-```
 func main() {
 	service := micro.NewService(
 		micro.Name(DefaultServiceName),
@@ -151,10 +110,25 @@ func main() {
 	}
 }
 ```
-#### Deployment
+#### 编写Dockerfile
+```
+FROM alpine
 
-**Here’s an example k8s deployment for a micro service**
+MAINTAINER liuyao@163.com
 
+ADD ./server /server
+
+EXPOSE 9100
+
+CMD ["/server"]
+```
+#### 编译及上传镜像
+```
+CGO_ENABLED=0 GOOS=linux go build -o server main.go
+docker build -t liuyao/go-micro-srv:kubernetes .
+docker push liuyao/go-micro-srv:kubernetes
+``` 
+#### 编写Deployment
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -179,7 +153,6 @@ spec:
             - containerPort: 9100
               name: rpc-port
 ```
-
 #### Deploy with kubectl
 
 ```
@@ -288,10 +261,9 @@ Server Hello Yao!
 
 ### 使用 ConfigMap 作为配置管理
 #### 原理
-此处有图
-https://10.96.0.1:443/api/v1/namespaces/go-micro/configmaps/go-micro-config"
-#### 编写ConfigMap清单
+![](media/15912865894760.jpg)
 
+#### 编写ConfigMap清单
 ```
 apiVersion: v1
 kind: ConfigMap
@@ -302,9 +274,7 @@ data:
   DB_NAME: MICRO
   DB_HOST: 192.168.0.1
 ```
-
 #### 编写代码
-
 ```
 import (
 	"fmt"
@@ -333,9 +303,7 @@ func main() {
 	}
 }
 ```
-
 #### 编写运行Pod清单
-
 ```
 apiVersion: v1
 kind: Pod
@@ -350,15 +318,13 @@ spec:
   restartPolicy: Never
   serviceAccountName: micro-services
 ```
-
 #### 运行
-
 ```
 cd go-micro-config
 kubectl apply -f k8s/pod.yaml
 ```
-#### 查看
-
+#### 查看结果
+```
 [root@k8s-master-1 k8s]# kubectl logs go-micro-config -n go-micro
 map[DB_HOST:map[192.168.0.1:] DB_NAME:map[MICRO:] 
 go:map[micro:map[srv:map[port:map[9100:map[tcp:map[addr:10.96.196.160 port:9100 proto:tcp]]] 
@@ -367,3 +333,4 @@ web:map[port:map[9200:map[tcp:map[addr:10.96.218.32 port:9200 proto:tcp]]]
 service:map[host:10.96.218.32 port:map[go:map[micro:map[web:9200]]]]]]] 
 home:/root hostname:go-micro-config kubernetes:map[port:map[443:map[tcp:tcp://10.96.0.1:443]] 
 service:map[host:10.96.0.1 port:443]] path:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin]
+```
