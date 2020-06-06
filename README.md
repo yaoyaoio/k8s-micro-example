@@ -16,11 +16,11 @@ and through the way of calling apiserver to carry out service discovery registra
 
 ## Getting Started
 
-- [Dependencies]()
 - [Installing Go Micro](#installing-go-micro)
-- [Installing Protobuf](#installing-protobuf)
+- [Installing Protobuf and Writing Proto**](#installing-protobuf)
 - [Create Kubernetes Namespace](#create-kubernetes-namespace)
 - [Create RBAC](#create-rbac)
+- [Kubernetes Discovery]()
 - [Go Micro(RPC) on Kubernetes](#go-microrpc-on-kubernetes)
 - [Go Micro(Web) on Kubernetes](#go-microweb-on-kubernetes)
 - [Go Micro(RPC) MultiService on Kubernetes](#go-microrpc-multiservice-on-kubernetes)
