@@ -321,40 +321,111 @@ kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 ```
 #### 编写代码
+```
+import (
+	"fmt"
+	"github.com/micro/go-micro/v2/web"
+	"github.com/micro/go-plugins/registry/kubernetes/v2"
+	"net/http"
+	"os"
+)
 
+func main() {
+	service := web.NewService(
+		web.Name("go-micro-web"),
+		web.Registry(kubernetes.NewRegistry()),
+		web.Address(":9200"))
+
+	service.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		podName := os.Getenv("HOSTNAME")
+		_, _ = writer.Write([]byte(podName))
+	})
+
+	if err := service.Init(); err != nil {
+		fmt.Println(err)
+	}
+
+	if err := service.Run(); err != nil {
+		fmt.Println(err)
+	}
+}
+```
 #### 编写Dockerfile
+```
+FROM alpine
 
+MAINTAINER liuyao@163.com
+
+ADD ./web /web
+
+EXPOSE 9200
+
+CMD ["/web"]
+```
 #### 编译及上传镜像
-
+```
+CGO_ENABLED=0 GOOS=linux go build -o web main.go
+docker build -t liuyao/go-micro-web:kubernetes .
+docker push liuyao/go-micro-web:kubernetes
+``` 
 #### 编写Deployment
-
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-web
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-web
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-web
+    spec:
+      containers:
+        - name: go-micro-web
+          image: liuyao/go-micro-web:kubernetes
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9200
+              name: http-port
+      serviceAccountName: micro-services
+```
 #### 编写Service
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-micro-web
+  namespace: go-micro
+  labels:
+    app: go-micro-web
+spec:
+  ports:
+    - port: 9200
+      name: go-micro-web
+      targetPort: 9200
+  selector:
+    app: go-micro-web
 
+```
 #### 部署
-
+```
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
 #### 查看运行状态,注册状态及启动日志
-```
-
-```
-
 ```
 kubectl get pods -n go-micro -o wide
 NAME                            READY   STATUS    RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
 go-micro-web-56b457b9f7-f7lds   1/1     Running   0          65s   10.1.0.114   docker-desktop   <none>           <none>
 go-micro-web-56b457b9f7-hvpg9   1/1     Running   0          65s   10.1.0.115   docker-desktop   <none>           <none>
-```
-
-```
 kubectl logs go-micro-web-56b457b9f7-f7lds -n go-micro
 2020-05-28 08:21:14  level=info service=web Listening on [::]:9200
 ```
-
-
-```
-kubectl get svc -n go-micro -o wide
-kubectl describe svc go-micro-web -n go-micro 
-```
-
 ### 多服务(Server/Client)运行案例
 
 **整个工程及代码，Dockerfile，Makefile，k8s相关文件都在go-micro-client目录下,Server端默认使用srv的代码 可以看第一节的内容**

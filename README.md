@@ -267,139 +267,168 @@ spec:
               name: rpc-port
 ```
 #### Writing Service
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-micro-srv
+  namespace: go-micro
+  labels:
+    app: go-micro-srv
+spec:
+  ports:
+    - port: 9100
+      name: go-micro-srv
+      targetPort: 9100
+  selector:
+    app: go-micro-srv
+```
+#### Deploy
+```
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+#### Select Run Status & Registry Status & Start Logs
+```
+kubectl get pods -n go-micro |grep go-micro-srv
+go-micro-srv-6cc7848c6-4knrm      1/1     Running     0          17h
+go-micro-srv-6cc7848c6-lf6wm      1/1     Running     0          17h
+kubectl describe pod go-micro-srv-6cc7848c6-4knrm -n go-micro
+···
+Labels:       app=go-micro-srv
+              micro.mu/selector-go-micro-srv=service
+              micro.mu/type=service
+              pod-template-hash=6cc7848c6
+Annotations:  cni.projectcalico.org/podIP: 10.100.109.174/32
+              cni.projectcalico.org/podIPs: 10.100.109.174/32
+              micro.mu/service-go-micro-srv:
+                {"name":"go-micro-srv","version":"latest","metadata":null,"endpoints":[{"name":"Greeter.Hello","request":{"name":"HelloRequest","type":"He.
+···
+查看日志
+kubectl logs go-micro-srv-6cc7848c6-4knrm -n go-micro
+2020-04-28 03:31:03  level=info Starting [service] go-micro-srv
+2020-04-28 03:31:03  level=info Server [grpc] Listening on [::]:9100
+2020-04-28 03:31:03  level=info Registry [kubernetes] Registering node: go-micro-srv-5c1ae799-d6be-48aa-b56c-be3457508bc5
+```
 
 
 
+### Go Micro(Web) on Kubernetes
 
+#### Deploy
+```
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+#### Writing Code
+```
+import (
+	"fmt"
+	"github.com/micro/go-micro/v2/web"
+	"github.com/micro/go-plugins/registry/kubernetes/v2"
+	"net/http"
+	"os"
+)
 
+func main() {
+	service := web.NewService(
+		web.Name("go-micro-web"),
+		web.Registry(kubernetes.NewRegistry()),
+		web.Address(":9200"))
 
+	service.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		podName := os.Getenv("HOSTNAME")
+		_, _ = writer.Write([]byte(podName))
+	})
 
+	if err := service.Init(); err != nil {
+		fmt.Println(err)
+	}
 
+	if err := service.Run(); err != nil {
+		fmt.Println(err)
+	}
+}
+```
+#### Writing Dockerfile
+```
+FROM alpine
 
+MAINTAINER liuyao@163.com
 
+ADD ./web /web
 
+EXPOSE 9200
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-### Go Micro(RPC) on Kubernetes
-
-**go-micro-srv**
-
-#### Writing a Go Micro Service
-
-#### Deployment
-
-**Here’s an example k8s deployment for a micro service**
-
+CMD ["/web"]
+```
+#### Compile & Push Image
+```
+CGO_ENABLED=0 GOOS=linux go build -o web main.go
+docker build -t liuyao/go-micro-web:kubernetes .
+docker push liuyao/go-micro-web:kubernetes
+``` 
+#### Writing Deployment
 ```
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: go-micro
-  name: go-micro-srv
+  name: go-micro-web
 spec:
   selector:
     matchLabels:
-      app: go-micro-srv
+      app: go-micro-web
   replicas: 2
   template:
     metadata:
       labels:
-        app: go-micro-srv
+        app: go-micro-web
     spec:
       containers:
-        - name: go-micro-srv
-          image: liuyao/go-micro-srv:kubernetes
+        - name: go-micro-web
+          image: liuyao/go-micro-web:kubernetes
           imagePullPolicy: Always
           ports:
-            - containerPort: 9100
-              name: rpc-port
+            - containerPort: 9200
+              name: http-port
+      serviceAccountName: micro-services
+```
+#### Writing Service
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: go-micro-web
+  namespace: go-micro
+  labels:
+    app: go-micro-web
+spec:
+  ports:
+    - port: 9200
+      name: go-micro-web
+      targetPort: 9200
+  selector:
+    app: go-micro-web
 
 ```
-Deploy with kubectl
-
-```
-kubectl apply -f k8s/deployment.yaml
-```
-
-
-```
-
-kubectl apply -f k8s/service.yaml
-
-
-
-make build or docker pull liuyao/go-micro-srv
-kubectl apply -f k8s/role.yaml
-kubectl apply -f k8s/roleBinding.yaml
-kubectl apply -f k8s/persistentVolumeClaim.yaml 
-kubectl apply -f k8s/deployment.yaml
-```
-
-### Go Micro(Web) on Kubernetes
-```
-cd go-micro-web
-make build or docker pull liuyao/go-micro-web
-```
+#### Deploy
 ```
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 ```
-
+#### Select Run Status & Registry Status & Start Logs
 ```
 kubectl get pods -n go-micro -o wide
 NAME                            READY   STATUS    RESTARTS   AGE   IP           NODE             NOMINATED NODE   READINESS GATES
-go-micro-srv-77c947dd6d-2rcj2   1/1     Running   0          16h   10.1.0.112   docker-desktop   <none>           <none>
-go-micro-srv-77c947dd6d-474t5   1/1     Running   0          16h   10.1.0.113   docker-desktop   <none>           <none>
 go-micro-web-56b457b9f7-f7lds   1/1     Running   0          65s   10.1.0.114   docker-desktop   <none>           <none>
 go-micro-web-56b457b9f7-hvpg9   1/1     Running   0          65s   10.1.0.115   docker-desktop   <none>           <none>
-```
-
-```
 kubectl logs go-micro-web-56b457b9f7-f7lds -n go-micro
 2020-05-28 08:21:14  level=info service=web Listening on [::]:9200
 ```
-
-
-```
-kubectl get svc -n go-micro -o wide
-kubectl describe svc go-micro-web -n go-micro 
-```
-
 ### Go Micro(RPC) MultiService on Kubernetes
 
 
 
 
 
-
-### Go-micro(RPC/Web) on Kubernetes
-
-
-
-
-### Using ConfigMap
-#### 原理
-此处有图
-https://10.96.0.1:443/api/v1/namespaces/go-micro/configmaps/go-micro-config"
-#### 写一个configmaps
-
-#### 编写代码
-
-#### 运行
-
-#### 查看
-
-[root@k8s-master-1 k8s]# kubectl logs go-micro-config -n go-micro
-map[DB_HOST:map[192.168.0.1:] DB_NAME:map[MICRO:] go:map[micro:map[srv:map[port:map[9100:map[tcp:map[addr:10.96.196.160 port:9100 proto:tcp]]] service:map[host:10.96.196.160 port:map[go:map[micro:map[srv:9100]]]]] web:map[port:map[9200:map[tcp:map[addr:10.96.218.32 port:9200 proto:tcp]]] service:map[host:10.96.218.32 port:map[go:map[micro:map[web:9200]]]]]]] home:/root hostname:go-micro-config kubernetes:map[port:map[443:map[tcp:tcp://10.96.0.1:443]] service:map[host:10.96.0.1 port:443]] path:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin]
