@@ -18,7 +18,7 @@ and through the way of calling apiserver to carry out service discovery registra
 
 ## Getting Started
 - [Installing Go Micro](#installing-go-micro)
-- [Installing Protobuf and Writing Proto**](#installing-protobuf)
+- [Installing Protobuf and Writing Proto](#installing-protobuf)
 - [Create Kubernetes Namespace](#create-kubernetes-namespace)
 - [Create RBAC](#create-rbac)
 - [Kubernetes Discovery]()
