@@ -72,6 +72,7 @@ protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
 ls proto
 greeter.pb.micro.go greeter.proto greeter.proto
 ```
+
 ### 创建kubernetes的命名空间
 **所有服务都运行在此命名空间下**
 #### 命名空间清单写法如下
@@ -91,6 +92,7 @@ kubectl apply -f k8s/namespace.yaml
 kubectl get ns |grep micro
 go-micro          Active   36d
 ```
+
 ### 创建RBAC 
 **对serviceaccount绑定操作pod及操作configmap的权限,会挂载到每个pod到/var/run/secrets/kubernetes.io/serviceaccount下面.**
 
@@ -312,7 +314,6 @@ kubectl logs go-micro-srv-6cc7848c6-4knrm -n go-micro
 ```
 查看label和Annotations发现已经更新相关字段，表示注册成功.
 
-
 ### Web服务运行案例
 **整个工程及代码，Dockerfile，Makefile，k8s相关文件都在go-micro-srv目录下**
 #### 快速部署
@@ -426,6 +427,7 @@ go-micro-web-56b457b9f7-hvpg9   1/1     Running   0          65s   10.1.0.115   
 kubectl logs go-micro-web-56b457b9f7-f7lds -n go-micro
 2020-05-28 08:21:14  level=info service=web Listening on [::]:9200
 ```
+
 ### 多服务(Server/Client)运行案例
 
 **整个工程及代码，Dockerfile，Makefile，k8s相关文件都在go-micro-client目录下,Server端默认使用srv的代码 可以看第一节的内容**
@@ -487,22 +489,49 @@ func registryRPCHandler(s client.Client) {
 }
 ```
 #### 编写Dockerfile
+```
+FROM alpine
 
+MAINTAINER liuyao@163.com
 
+ADD ./client /client
 
+EXPOSE 9200
+
+CMD ["/client"]
+```
 #### 编译及上传镜像
-
-
+```
+CGO_ENABLED=0 GOOS=linux go build  -o client main.go
+docker build -t liuyao/go-micro-client:kubernetes .
+docker push liuyao/go-micro-client:kubernetes
+```
 #### 编写Deployment
-
-
-#### 编写Service
-
-
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-client
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-client
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-client
+    spec:
+      containers:
+        - name: go-micro-client
+          image: liuyao/go-micro-client:kubernetes
+          imagePullPolicy: Always
+      serviceAccountName: micro-services
+```
 #### 部署
 ```
 kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
 ```
 #### 查看运行状态,注册状态及启动日志
 ```
@@ -527,6 +556,7 @@ kubectl logs go-micro-client-64b999f5d-wntkz -n go-micro
 2020-04-28 05:57:37  level=info Registry [kubernetes] Registering node: go-micro-client-d227891e-29b1-4d7f-81ad-d53ae11bb7f6
 Server Hello Yao!
 ```
+
 ### 基于Kubernetes ConfigMap做配置管理的实现原理
 #### 原理
 ![](media/15912865894760.jpg)
@@ -588,7 +618,7 @@ spec:
   restartPolicy: Never
   serviceAccountName: micro-services
 ```
-#### 运行
+#### 部署
 ```
 cd go-micro-config
 kubectl apply -f k8s/pod.yaml

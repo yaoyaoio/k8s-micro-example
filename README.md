@@ -72,6 +72,7 @@ protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
 ls proto
 greeter.pb.micro.go greeter.proto greeter.proto
 ```
+
 ### Create Kubernetes Namespace
 
 #### Writing a namespace
@@ -91,6 +92,7 @@ kubectl apply -f k8s/namespace.yaml
 kubectl get ns |grep micro
 go-micro          Active   36d
 ```
+
 ### Create RBAC
 
 
@@ -177,7 +179,7 @@ kubectl apply -f k8s/pod-rbac.yaml
 
 
 
-
+ing...
 
 ### Go Micro(RPC) on Kubernetes
 
@@ -311,8 +313,6 @@ kubectl logs go-micro-srv-6cc7848c6-4knrm -n go-micro
 2020-04-28 03:31:03  level=info Registry [kubernetes] Registering node: go-micro-srv-5c1ae799-d6be-48aa-b56c-be3457508bc5
 ```
 
-
-
 ### Go Micro(Web) on Kubernetes
 
 #### Deploy
@@ -426,9 +426,206 @@ go-micro-web-56b457b9f7-hvpg9   1/1     Running   0          65s   10.1.0.115   
 kubectl logs go-micro-web-56b457b9f7-f7lds -n go-micro
 2020-05-28 08:21:14  level=info service=web Listening on [::]:9200
 ```
+
+
 ### Go Micro(RPC) MultiService on Kubernetes
 
 
 
+#### Deploy
+```
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+```
+#### Writing Code
+```
+import (
+	"context"
+	"fmt"
+	"github.com/micro/go-micro/v2"
+	"github.com/micro/go-micro/v2/client"
+	grpcc "github.com/micro/go-micro/v2/client/grpc"
+	"github.com/micro/go-plugins/registry/kubernetes/v2"
+	proto "github.com/yaoliu/k8s-micro/proto"
+	"time"
+)
 
+var (
+	DefaultServiceName = "go-micro-client"
+	DefaultSrvName     = "go-micro-srv"
+)
 
+func main() {
+	service := micro.NewService(
+		micro.Name(DefaultServiceName),
+		micro.Client(grpcc.NewClient()),
+		micro.Registry(kubernetes.NewRegistry()),
+	)
+	service.Init()
+	go func() {
+		registryRPCHandler(service.Client())
+	}()
+	if err := service.Run(); err != nil {
+		fmt.Println(err)
+	}
+
+}
+
+func registryRPCHandler(s client.Client) {
+	timer := time.NewTicker(time.Second * 10)
+	defer timer.Stop()
+	for {
+		select {
+		case <-timer.C:
+			greeter := proto.NewGreeterService(DefaultSrvName, s)
+			rsp, err := greeter.Hello(context.TODO(), &proto.HelloRequest{Name: "Yao"})
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("Server", rsp.Greeting)
+			}
+		}
+	}
+}
+```
+#### Writing Dockerfile
+```
+FROM alpine
+
+MAINTAINER liuyao@163.com
+
+ADD ./client /client
+
+EXPOSE 9200
+
+CMD ["/client"]
+```
+#### Compile & Push Images
+```
+CGO_ENABLED=0 GOOS=linux go build  -o client main.go
+docker build -t liuyao/go-micro-client:kubernetes .
+docker push liuyao/go-micro-client:kubernetes
+```
+#### Writing Deployment
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-client
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-client
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-client
+    spec:
+      containers:
+        - name: go-micro-client
+          image: liuyao/go-micro-client:kubernetes
+          imagePullPolicy: Always
+      serviceAccountName: micro-services
+```
+#### Depoly
+```
+kubectl apply -f k8s/deployment.yaml
+```
+#### Select Run Status & Registry Status & Start Logs
+```
+kubectl get pods -n go-micro
+NAME                              READY   STATUS    RESTARTS   AGE
+go-micro-client-64b999f5d-m9ffk   1/1     Running   0          20m
+go-micro-client-64b999f5d-wntkz   1/1     Running   0          20m
+kubectl describe pod go-micro-client-64b999f5d-wntkz -n go-micro
+···
+Labels:       app=go-micro-client
+              micro.mu/selector-go-micro-client=service
+              micro.mu/type=service
+              pod-template-hash=64b999f5d
+Annotations:  cni.projectcalico.org/podIP: 10.100.109.133/32
+              cni.projectcalico.org/podIPs: 10.100.109.133/32
+              micro.mu/service-go-micro-client:
+                {"name":"go-micro-client","version":"latest","metadata":null,"endpoints":[],"nodes":[{"id":"go-micro-client-d227891e-29b1-4d7f-81ad-d53ae1...
+···
+kubectl logs go-micro-client-64b999f5d-wntkz -n go-micro
+2020-04-28 05:57:37  level=info Starting [service] go-micro-client
+2020-04-28 05:57:37  level=info Server [grpc] Listening on [::]:46701
+2020-04-28 05:57:37  level=info Registry [kubernetes] Registering node: go-micro-client-d227891e-29b1-4d7f-81ad-d53ae11bb7f6
+Server Hello Yao!
+```
+### Using ConfigMap
+
+#### Writing Config Map
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: go-micro-config
+  namespace: go-micro
+data:
+  DB_NAME: MICRO
+  DB_HOST: 192.168.0.1
+```
+#### Writing Code
+```
+import (
+	"fmt"
+	"github.com/micro/go-micro/v2/config"
+	"github.com/micro/go-micro/v2/config/source/env"
+	"github.com/micro/go-plugins/config/source/configmap/v2"
+)
+
+var (
+	DefaultNamespace  = "go-micro"
+	DefaultConfigName = "go-micro-config"
+)
+
+func main() {
+	if cfg, err := config.NewConfig(); err == nil {
+		err = cfg.Load(
+			env.NewSource(),
+			configmap.NewSource(
+				configmap.WithName(DefaultConfigName),
+				configmap.WithNamespace(DefaultNamespace)),
+		)
+		if err == nil {
+			fmt.Println(cfg.Map())
+		}
+		fmt.Println(err)
+	}
+}
+```
+#### Writing Pod
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: go-micro-config
+  namespace: go-micro
+spec:
+  containers:
+    - name: go-micro-config
+      image: liuyao/go-micro-config:kubernetes
+      imagePullPolicy: Always
+  restartPolicy: Never
+  serviceAccountName: micro-services
+```
+#### Deploy
+```
+cd go-micro-config
+kubectl apply -f k8s/pod.yaml
+```
+#### Select Result
+```
+[root@k8s-master-1 k8s]# kubectl logs go-micro-config -n go-micro
+map[DB_HOST:map[192.168.0.1:] DB_NAME:map[MICRO:] 
+go:map[micro:map[srv:map[port:map[9100:map[tcp:map[addr:10.96.196.160 port:9100 proto:tcp]]] 
+service:map[host:10.96.196.160 port:map[go:map[micro:map[srv:9100]]]]] 
+web:map[port:map[9200:map[tcp:map[addr:10.96.218.32 port:9200 proto:tcp]]] 
+service:map[host:10.96.218.32 port:map[go:map[micro:map[web:9200]]]]]]] 
+home:/root hostname:go-micro-config kubernetes:map[port:map[443:map[tcp:tcp://10.96.0.1:443]] 
+service:map[host:10.96.0.1 port:443]] path:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin]
+```
