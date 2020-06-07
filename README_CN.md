@@ -27,7 +27,7 @@ Go Micro on kubernetes
 - [多服务(Server/Client)运行案例]()
 - [基于Kubernetes ConfigMap做配置管理的实现原理]()
 - [使用 ConfigMap]()
-- TODO:健康检查RPC方式及HTTP方式
+- [健康检查]()
 
 
 ### 安装 Go Micro
@@ -417,11 +417,16 @@ func registryRPCHandler(s client.Client) {
 ```
 #### 编写Dockerfile
 
+
+
 #### 编译及上传镜像
+
 
 #### 编写Deployment
 
+
 #### 编写Service
+
 
 #### 部署
 ```
