@@ -27,13 +27,11 @@ Go Micro on kubernetes
 - [多服务(Server/Client)运行案例]()
 - [基于Kubernetes ConfigMap做配置管理的实现原理]()
 - [使用 ConfigMap]()
-- [健康检查]()
-
+- [TODO:健康检查]()
 
 ### 安装 Go Micro
 
 版本要选择v2.x版本，因为服务注册kubernetes的相关插件应该是v2.x版本以后才有，作者使用了v2.3.0版本
-
 ```
 go get github.com/micro/go-micro/v2@v2.3.0
 go get github.com/micro/go-plugins/registry/kubernetes/v2@v2.3.0
@@ -269,6 +267,7 @@ spec:
               name: rpc-port
 ```
 #### 编写Service
+```
 apiVersion: v1
 kind: Service
 metadata:
@@ -283,6 +282,7 @@ spec:
       targetPort: 9100
   selector:
     app: go-micro-srv
+```
 #### 部署
 ```
 kubectl apply -f k8s/deployment.yaml

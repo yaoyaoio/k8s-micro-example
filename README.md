@@ -6,16 +6,17 @@ Go Micro on kubernetes
 
 This project mainly demonstrates how the [Go-Micro](https://github.com/micro/) runs on the kubernetes cluster, 
 and through the way of calling apiserver to carry out service discovery registration and configuration management
-
 ## Features
 
+- Go-Micro
 - Protobuf
 - GRPC
-- Kubernetes
+- Kubernetes Discovery
+- Kubernetes ConfigMap
 - MultiService Example
+- Cloud Native
 
 ## Getting Started
-
 - [Installing Go Micro](#installing-go-micro)
 - [Installing Protobuf and Writing Proto**](#installing-protobuf)
 - [Create Kubernetes Namespace](#create-kubernetes-namespace)
@@ -26,26 +27,54 @@ and through the way of calling apiserver to carry out service discovery registra
 - [Go Micro(RPC) MultiService on Kubernetes](#go-microrpc-multiservice-on-kubernetes)
 - [Go-micro(RPC/Web) on Kubernetes](#go-microrpcweb-on-kubernetes)
 - [Using ConfigMap](#using-configmap)
+- [TODO:Health]()
 
 ### Installing Go Micro
 
+
 ```
-go get github.com/micro/go-micro/v2
-go get github.com/micro/go-plugins/registry/kubernetes/v2
+go get github.com/micro/go-micro/v2@v2.3.0
+go get github.com/micro/go-plugins/registry/kubernetes/v2@v2.3.0
+go get github.com/micro/go-plugins/config/source/configmap/v2@v2.3.0
 ```
 
-### Installing Protobuf
+### Installing Protobuf & Writing Proto
 
+#### Installing Protobuf
 ```
 brew install protobuf
 go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
-protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
+```
+#### Writing Proto
+
+
+
+```
+syntax = "proto3";
+
+service Greeter {
+    rpc Hello (HelloRequest) returns (HelloResponse) {
+    }
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloResponse {
+    string greeting = 2;
+}
 ```
 
+#### Generate
+```
+protoc --proto_path=$GOPATH/src:. --micro_out=. --go_out=. proto/greeter.proto
+ls proto
+greeter.pb.micro.go greeter.proto greeter.proto
+```
 ### Create Kubernetes Namespace
 
 #### Writing a namespace
-
 ```
 apiVersion: v1
 kind: Namespace
@@ -53,20 +82,210 @@ metadata:
   name: go-micro
   namespace: go-micro
 ```
-
 #### Deploying a NameSpace
-
 ```
 kubectl apply -f k8s/namespace.yaml
 ```
-
 #### Select Result
-
 ```
 kubectl get ns |grep micro
+go-micro          Active   36d
+```
+### Create RBAC
+
+
+#### Writing Pod RBAC
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: micro-registry
+  namespace: go-micro
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - patch
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: micro-registry
+  namespace: go-micro
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: micro-registry
+subjects:
+  - kind: ServiceAccount
+    name: micro-services
+    namespace: go-micro
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: go-micro
+  name: micro-service
+```
+#### Writing ConfigMap RBAC
+```
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: micro-config
+  namespace: go-micro
+  labels:
+    app: go-micro-config
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "update", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: micro-config
+  namespace: go-micro
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: micro-config
+subjects:
+  - kind: ServiceAccount
+    name: micro-services
+    namespace: go-micro
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: go-micro
+  name: micro-services
+```
+#### Create
+```
+kubectl apply -f k8s/configmap-rbac.yaml
+kubectl apply -f k8s/pod-rbac.yaml
 ```
 
-### Create RBAC
+### Kubernetes Discovery
+
+
+
+
+
+
+### Go Micro(RPC) on Kubernetes
+
+#### Deploy
+```
+kubectl apply -f go-micro-srv/k8s/deployment.yaml
+kubectl apply -f go-micro-srv/k8s/service.yaml
+```
+#### Writing Code
+```
+import (
+	"context"
+	"fmt"
+	"github.com/micro/go-micro/v2"
+	grpcc "github.com/micro/go-micro/v2/client/grpc"
+	"github.com/micro/go-micro/v2/server"
+	grpcs "github.com/micro/go-micro/v2/server/grpc"
+	"github.com/micro/go-plugins/registry/kubernetes/v2"
+	proto "github.com/yaoliu/k8s-micro/proto"
+	_ "net/http/pprof"
+)
+
+type Greeter struct{}
+
+func (g Greeter) Hello(ctx context.Context, request *proto.HelloRequest, response *proto.HelloResponse) error {
+	response.Greeting = "Hello " + request.Name + "!"
+	return nil
+}
+
+func main() {
+	service := micro.NewService(
+		micro.Name(DefaultServiceName),
+		micro.Server(grpcs.NewServer(server.Address(DefaultServerPort), server.Name(DefaultServiceName))),
+		micro.Client(grpcc.NewClient()), 
+		micro.Registry(kubernetes.NewRegistry()),//注册到Kubernetes
+	)
+	service.Init()
+
+	_ = proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+
+	if err := service.Run(); err != nil {
+		fmt.Println(err)
+	}
+}
+```
+#### Writing Dockerfile
+```
+FROM alpine
+
+MAINTAINER liuyao@163.com
+
+ADD ./server /server
+
+EXPOSE 9100
+
+CMD ["/server"]
+```
+#### Compile & Push Image
+```
+CGO_ENABLED=0 GOOS=linux go build -o server main.go
+docker build -t liuyao/go-micro-srv:kubernetes .
+docker push liuyao/go-micro-srv:kubernetes
+```
+#### Writing Deployment
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: go-micro
+  name: go-micro-srv
+spec:
+  selector:
+    matchLabels:
+      app: go-micro-srv
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: go-micro-srv
+    spec:
+      containers:
+        - name: go-micro-srv
+          image: liuyao/go-micro-srv:kubernetes
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9100
+              name: rpc-port
+```
+#### Writing Service
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
