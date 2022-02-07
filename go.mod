@@ -14,7 +14,7 @@ require (
 	github.com/micro/go-plugins/broker/kafka/v2 v2.3.0 // indirect
 	github.com/micro/go-plugins/config/source/configmap/v2 v2.3.0 // indirect
 	github.com/micro/go-plugins/registry/kubernetes/v2 v2.3.0 // indirect
-	github.com/nats-io/nats-server/v2 v2.1.6 // indirect
+	github.com/nats-io/nats-server/v2 v2.2.0 // indirect
 	go.etcd.io/bbolt v1.3.4 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/grpc v1.29.1 // indirect
